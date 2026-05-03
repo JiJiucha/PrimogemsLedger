@@ -224,8 +224,8 @@ def generate_reports(uid, nickname, months_data):
 
     with open(root_readme_path, 'w', encoding='utf-8') as root_readme:
         root_readme.write(f"# 原神旅行札记账单汇总\n\n ### {nickname} (UID: {uid}) \n\n")
-        root_readme.write("| 月份 | 总原石 | 链接 |\n")
-        root_readme.write("|------|--------|------|\n")
+        root_readme.write("| 月份 | 总原石 | 抽数 | 链接 |\n")
+        root_readme.write("|------|--------|------|------|\n")
 
         global_total = defaultdict(int)
 
@@ -238,7 +238,7 @@ def generate_reports(uid, nickname, months_data):
             for act, val in md['month_total'].items():
                 global_total[act] += val
 
-            root_readme.write(f"| {year}年{month:02d}月 | {month_total_val} | [查看](./{month_folder}/README.md) |\n")
+            root_readme.write(f"| {year}年{month:02d}月 | {month_total_val} | ≈{month_total_val//160} | [查看](./{month_folder}/README.md) |\n")
 
             month_path = os.path.join(role_report_dir, month_folder)
             os.makedirs(month_path, exist_ok=True)
@@ -247,14 +247,14 @@ def generate_reports(uid, nickname, months_data):
             month_readme_path = os.path.join(month_path, 'README.md')
             with open(month_readme_path, 'w', encoding='utf-8') as month_readme:
                 month_readme.write(f"# {year}年{month:02d}月 原神账单\n\n ### {nickname} (UID: {uid}) \n\n")
-                month_readme.write("| 日期 | 原石数 | 链接 |\n")
-                month_readme.write("|------|--------|------|\n")
+                month_readme.write("| 日期 | 原石数 | 抽数 | 链接 |\n")
+                month_readme.write("|------|--------|------|------|\n")
 
                 sorted_dates = sorted(md['daily_summary'].keys())
                 for date in sorted_dates:
                     daily_total = md['daily_summary'][date]['summary']['total']
                     date_filename = date.replace('-', '')
-                    month_readme.write(f"| {date} | {daily_total} | [明细](./{date_filename}.md) |\n")
+                    month_readme.write(f"| {date} | {daily_total} | ≈{daily_total//160} | [明细](./{date_filename}.md) |\n")
 
                 month_readme.write(f"\n## 📊 月份总计\n\n")
                 sorted_month_actions = sorted(
@@ -265,7 +265,7 @@ def generate_reports(uid, nickname, months_data):
                 for act, val in sorted_month_actions:
                     percent = (val / month_total_val) * 100 if month_total_val else 0
                     month_readme.write(f"- **{act}**：{val} ({percent:.2f}%)\n")
-                month_readme.write(f"\n**🔥 总原石：{month_total_val}**\n")
+                month_readme.write(f"\n**🔥 总原石：{month_total_val}(≈{month_total_val//160}抽)**\n")
 
                 # 生成每日明细文件
                 for date in sorted_dates:
@@ -276,7 +276,7 @@ def generate_reports(uid, nickname, months_data):
 
                     with open(day_file_path, 'w', encoding='utf-8') as day_file:
                         day_file.write(f"# {date} 原神账单明细\n\n ### {nickname} (UID: {uid}) \n\n")
-                        day_file.write(f"当日总计：**{daily_total}** 原石\n\n")
+                        day_file.write(f"当日总计：**{daily_total}** 原石(≈{daily_total//160}抽)\n\n")
                         day_file.write('<details open>\n')
                         day_file.write('<summary>📋 原石记录明细</summary>\n\n')
                         day_file.write("| 时间 | 动作 | 数量 |\n")
@@ -305,7 +305,7 @@ def generate_reports(uid, nickname, months_data):
         for act, val in sorted_global_actions:
             percent = (val / global_total_val) * 100 if global_total_val else 0
             root_readme.write(f"- **{act}**：{val} ({percent:.2f}%)\n")
-        root_readme.write(f"\n**🏆 历史总原石：{global_total_val}**\n")
+        root_readme.write(f"\n**🏆 历史总原石：{global_total_val}(≈{global_total_val//160}抽)**\n")
 
     print(f"\n✅ 报告已生成于：{os.path.abspath(role_report_dir)}")
 
@@ -366,11 +366,11 @@ def generate_global_summary(accounts_info, report_root):
         f.write("# 原神旅行札记 · 全局账号汇总\n\n")
         for region_name in sorted(groups.keys()):
             f.write(f"## 🌍 {region_name}\n\n")
-            f.write("| 游戏名 | UID | 总原石量 | 详细报告 |\n")
-            f.write("|:------:|:---:|:--------:|:--------:|\n")
+            f.write("| 游戏名 | UID | 总原石量 | 抽数 | 详细报告 |\n")
+            f.write("|:------:|:---:|:--------:|:---:|:--------:|\n")
             # 组内按 UID 数值升序排序
             for uid, total, nickname in sorted(groups[region_name], key=lambda x: int(x[0])):
-                f.write(f"| {nickname} | {uid} | {total} | [查看](./{uid}/README.md) |\n")
+                f.write(f"| {nickname} | {uid} | {total} | ≈{total//160} | [查看](./{uid}/README.md) |\n")
             f.write("\n")
 
         grand_total = sum(total for _, total, _, _ in accounts_info)
